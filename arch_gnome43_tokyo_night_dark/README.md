@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a guide to install Arch Linux with Gnome 43 and Tokyo Night Theme, this guide is based on my Arch Linux installation guide, so if you want to know more about Arch Linux installation you can check it out [here](https://github.com/ansango/dotfiles/blob/main/docs/InstallArch.md).
+This is a guide to install Arch Linux with Gnome 43 and Tokyo Night Theme, this guide is based on my Arch Linux installation guide, so if you want to know more about Arch Linux installation you can check it out [here](../docs/InstallArch.md).
 
 ## Installing Gnome
 
