@@ -1,5 +1,11 @@
 #! /usr/bin/env bash
 
+# Actualizar la base de datos de paquetes
+sudo pacman -Sy
+
+# Instalar git
+sudo pacman -S --noconfirm git
+
 echo "Instalando Gnome..."
 
 # Instalar Gnome minimal

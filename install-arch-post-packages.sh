@@ -51,7 +51,7 @@ echo "Zsh"
 sudo pacman -S --noconfirm zsh zsh-completions
 echo "Cambiar la shell por defecto a Zsh"
 # Cambiar la shell por defecto a Zsh
-chsh -s /bin/zsh
+sudo chsh -s /bin/zsh
 
 echo "Oh My Zsh"
 # Instalar Oh My Zsh
@@ -82,7 +82,7 @@ echo "Obsidian"
 yay -S --noconfirm obsidian
 
 # Copiar todos los archivos
-cp -r ./install-arch-packages ~/
+cp -r ./install-arch-post-packages/.* ./install-arch-post-packages/* ~
 cp -r ./backgrounds/* ~/Pictures
 
 echo "Clonando vault"
