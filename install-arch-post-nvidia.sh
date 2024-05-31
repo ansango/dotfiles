@@ -1,10 +1,8 @@
-# Instalar paquetes esenciales Nvidia
-sudo pacman -S --noconfirm nvidia nvidia-utils nvidia-settings opencl-nvidia xorg-server-devel
 
-echo "Reinicia el sistema para aplicar los cambios."
-echo "Después setea el monitor primario y las configuraciones que estimes, rotación si tienes vertical, etc…"
-echo "Desues copia el archivo de configuración de monitores a la carpeta de gdm:"
-echo ""
-echo "sudo cp ~/.config/monitors.xml ~gdm/.config/"
-echo ""
-echo "Reinicia el sistema para aplicar los cambios."
+echo “install i915 /bin/false” | sudo tee --append /etc/modprobe.d/blacklist.conf
+cat /etc/modprobe.d/blacklist.conf
+sudo pacman -Syyuu
+sudo pacman -S xorg-server xorg-xinit xorg-apps --noconfirm
+sudo pacman -S nvidia nvidia-utils nvidia-settings --noconfirm
+cat /usr/lib/modprobe.d/nvidia-settings.conf
+
