@@ -6,6 +6,30 @@ sudo pacman -Sy
 # Instalar git
 sudo pacman -S --noconfirm git
 
+echo "Instalando Yay"
+
+if [ -d "yay" ]; then
+    sudo rm -rf yay
+fi
+
+# Clonar y construir yay desde AUR
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si --noconfirm
+cd ..
+# Verificar que yay se haya instalado correctamente
+versionyay=$(yay --version)
+
+if [ -z "$versionyay" ]; then
+    echo "Yay no se ha instalado correctamente."
+    exit 1
+fi
+
+echo "Yay se ha instalado correctamente."
+
+# Borrar el directorio yay
+sudo rm -rf yay
+
 echo ""
 echo "Instalando Gnome..."
 echo ""
