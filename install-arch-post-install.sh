@@ -28,6 +28,18 @@ sudo pacman -S --noconfirm alacritty
 
 echo "Habilitando servicios..."
 
+# Copiar la imagen de fondo a la ubicación de GDM
+sudo cp ./backgrounds/aurora.jpg /usr/share/backgrounds/
+
+# Configurar GDM para usar la nueva imagen de fondo
+sudo bash -c "cat > /etc/dconf/db/gdm.d/01-background <<EOF
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/aurora.jpg'
+EOF"
+
+# Actualizar la configuración de GDM
+sudo dconf update
+
 sudo systemctl start bluetooth.service
 sudo systemctl enable bluetooth.service
 
