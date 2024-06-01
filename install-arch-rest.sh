@@ -4,16 +4,13 @@
 # Actualizar la base de datos de paquetes
 sudo pacman -Sy
 
-
 echo "Instalando paquetes..."
 echo "Google Chrome"
 
 # Instalar google-chrome
 yay -S --noconfirm google-chrome
 
-
 # Instalar github-cli
-
 sudo pacman -S --noconfirm github-cli
 gh auth login
 
