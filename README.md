@@ -4,69 +4,78 @@ This is a collection of my dotfiles.
 
 To my future self: remember to be simple and minimalistic. We only want to keep the essentials.
 
-## Dotfile Apps
+## SO Actual - Arch Linux - Gnome 46
 
-- [alacritty]
-- [bash]
-- [zsh]
-- [p10k]
+### Instalación Arch
 
-## Installation
+En una unidad USB de Arch Linux Live arrancada, abre una terminal y ejecuta el siguiente commando para iniciar el proceso de instalación:
 
 ```bash
-sudo pacman -S git
+archinstall
 ```
 
-```bash
-sudo pacman -S github-cli
+1. Archinstall Language - English
+2. Mirror region - 'spain' (or your country)
+3. Locales - us
+4. Disk configuration
+	1. Use a best effort defualt partition layout - elige tu disco
+	2. Filesystem - ext4
+	3. Partition /home - no
+5. Disk encryption - none
+6. Bootloader - grub-install
+7. Swap - true
+8. Hostname - arch_ansango
+9. Root pass - \*\*\*
+10. User account - none
+11. Profile - minimal
+12. Audio - pipewire
+13. Kernels: linux
+14. Additional packages - nano git
+15. Network configuration - Use Networkmanager
+16. Timezone - UTC
+17. Automatic Time Sync (NTP) - true
+18. Optional repositories - multilib
+
+Would you like to chroot into the newly created installation?
+
+> Yes
+
+### Agregar usuario
+
+- Agregar usuario
+
+```sh
+useradd -m -g wheel <your_user>
 ```
 
-```bash
-gh auth login
+- Crear contraseña para el usuario
+
+```sh
+passwd <your_user>
 ```
 
-```bash
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg -si
-```
-### Alacritty
+### Darle acceso a sudo
 
-```bash
-sudo pacman -S alacritty
-```
-### Zsh
+en usuario root ejecuta el siguiente commando
 
-```bash
-sudo pacman -S zsh zsh-completions
+```sh
+EDITOR=nano visudo
 ```
 
-```bash
-chsh -s /bin/zsh
+y descomenta esta línea para que se vea así
+
+```sh
+%wheel ALL=(ALL) ALL
 ```
 
-### Oh My Zsh
+si no quieres escribir tu contraseña cada vez, haz esto en su lugar
 
-```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussel/oh-my-zsh/master/tools/install.sh)"
+```sh
+%wheel ALL=(ALL) NOPASSWD: ALL
 ```
 
-### Powerlevel10k
+Inicia sesión en el usuario recién creado
 
 ```bash
-yay -S --noconfirm zsh-theme-powerlevel10k-git
-```
-
-```bash
-echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
-```
-
-```bash
-sudo pacman -S powerline-common awesome-terminal-fonts
-yay -S --noconfirm ttf-meslo-nerd-font-powerlevel10k
-```
-
-```bash
-git clone https://github.com/ansango/dotfiles.git
-cp -r dotfiles/. ~
+su - your_user_name
 ```
