@@ -5,35 +5,13 @@
 sudo pacman -Sy
 
 # Instalar git y github-cli
-sudo pacman -S --noconfirm git github-cli
-
-gitversion=$(git --version)
-ghversion=$(gh --version)
-
-echo "Git y GitHub CLI se han instalado correctamente."
+sudo pacman -S --noconfirm github-cli
 
 echo "Instalando paquetes..."
 echo "Google Chrome"
 
 # Instalar google-chrome
 yay -S --noconfirm google-chrome
-
-echo "Logueate en GitHub CLI"
-
-# Autenticación en GitHub CLI
-gh auth login
-
-echo "Instalando paquetes..."
-echo "Zsh"
-# Instalar Zsh y sus completions
-sudo pacman -S --noconfirm zsh zsh-completions
-echo "Cambiar la shell por defecto a Zsh"
-# Cambiar la shell por defecto a Zsh
-sudo chsh -s /bin/zsh
-
-echo "Oh My Zsh"
-# Instalar Oh My Zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 echo "Powerlevel10k"
 # Instalar Powerlevel10k
