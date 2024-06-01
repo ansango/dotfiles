@@ -4,14 +4,18 @@
 # Actualizar la base de datos de paquetes
 sudo pacman -Sy
 
-# Instalar git y github-cli
-sudo pacman -S --noconfirm github-cli
 
 echo "Instalando paquetes..."
 echo "Google Chrome"
 
 # Instalar google-chrome
 yay -S --noconfirm google-chrome
+
+
+# Instalar github-cli
+
+sudo pacman -S --noconfirm github-cli
+gh auth login
 
 echo "Powerlevel10k"
 # Instalar Powerlevel10k
@@ -24,6 +28,11 @@ echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zs
 echo "Powerline y fuentes adicionales"
 sudo pacman -S --noconfirm powerline-common awesome-terminal-fonts ttf-fira-code noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
 yay -S --noconfirm ttf-meslo-nerd-font-powerlevel10k
+
+echo ""
+echo "Gnome Extensions"
+sudo pacman -S --noconfirm gnome-tweaks
+yay -S --noconfirm gnome-shell-extension-dash-to-dock
 
 echo "Visual Studio Code"
 
