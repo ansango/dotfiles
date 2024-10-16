@@ -1,5 +1,3 @@
-Here’s the translation of your text into English:
-
 # Dotfiles
 
 This is a collection of my dotfiles.
@@ -80,4 +78,23 @@ Log in to the newly created user:
 
 ```bash
 su - your_user_name
+```
+### Install dotfiles
+
+Reboot your machine and log with your user
+
+```bash
+su - your_user_name
+```
+
+Clone the repository
+
+```bash
+git clone https://github.com/ansango/dotfiles.git
+```
+
+Execute post-install.sh
+
+```bash
+sh post-install.sh
 ```
