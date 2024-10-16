@@ -1,14 +1,16 @@
+Here’s the translation of your text into English:
+
 # Dotfiles
 
 This is a collection of my dotfiles.
 
 To my future self: remember to be simple and minimalistic. We only want to keep the essentials.
 
-## SO Actual - Arch Linux - Gnome 46
+## Current OS - Arch Linux - Gnome 47
 
-### Instalación Arch
+### Arch Installation
 
-En una unidad USB de Arch Linux Live arrancada, abre una terminal y ejecuta el siguiente commando para iniciar el proceso de instalación:
+On a bootable USB drive with Arch Linux Live, open a terminal and run the following command to start the installation process:
 
 ```bash
 archinstall
@@ -18,7 +20,7 @@ archinstall
 2. Mirror region - 'spain' (or your country)
 3. Locales - us
 4. Disk configuration
-	1. Use a best effort defualt partition layout - elige tu disco
+	1. Use a best effort default partition layout - choose your disk
 	2. Filesystem - ext4
 	3. Partition /home - no
 5. Disk encryption - none
@@ -40,41 +42,41 @@ Would you like to chroot into the newly created installation?
 
 > Yes
 
-### Agregar usuario
+### Add User
 
-- Agregar usuario
+- Add user
 
 ```sh
 useradd -m -g wheel <your_user>
 ```
 
-- Crear contraseña para el usuario
+- Set a password for the user
 
 ```sh
 passwd <your_user>
 ```
 
-### Darle acceso a sudo
+### Grant sudo access
 
-en usuario root ejecuta el siguiente commando
+As the root user, run the following command:
 
 ```sh
 EDITOR=nano visudo
 ```
 
-y descomenta esta línea para que se vea así
+And uncomment this line so it looks like this:
 
 ```sh
 %wheel ALL=(ALL) ALL
 ```
 
-si no quieres escribir tu contraseña cada vez, haz esto en su lugar
+If you don't want to enter your password every time, do this instead:
 
 ```sh
 %wheel ALL=(ALL) NOPASSWD: ALL
 ```
 
-Inicia sesión en el usuario recién creado
+Log in to the newly created user:
 
 ```bash
 su - your_user_name
