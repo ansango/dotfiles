@@ -165,6 +165,7 @@ log "Copying wallpapers..."
 mkdir -p ~/Pictures
 cp -r ~/dotfiles/backgrounds/* ~/Pictures/
 
+log ""
 log "Remember to restart the system to apply all changes."
 log ""
 log "Log in to GitHub with the following command:"
@@ -174,5 +175,7 @@ log "Install node.js with the following command:"
 log "nvm install --lts"
 log ""
 log "Install https://extensions.gnome.org/extension/3733/tiling-assistant/"
+log ""
+log "Install https://extensions.gnome.org/extension/307/dash-to-dock/"
 log ""
 log "Installation and configuration complete!"
