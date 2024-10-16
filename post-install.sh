@@ -57,6 +57,7 @@ if [[ $configure_nvidia =~ ^[Yy]$ ]]; then
     sudo pacman -S xorg-server xorg-xinit xorg-apps --noconfirm
     sudo pacman -S nvidia nvidia-utils nvidia-settings --noconfirm
     cat /usr/lib/modprobe.d/nvidia-utils.conf
+    blacklist nouveau
 fi
 
 # Instalar y configurar ZSH
