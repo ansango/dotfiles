@@ -157,12 +157,13 @@ fi
 
 # Copy .dotfiles
 log "Copying .dotfiles..."
-cp -a ~/dotfiles/dotfiles. ~/
+shopt -s dotglob
+cp -r ~/dotfiles/dotfiles/* ~/
 
 # Copy wallpapers
 log "Copying wallpapers..."
 mkdir -p ~/Pictures
-cp -r ~/backgrounds/. ~/Pictures/
+cp -r ~/dotfiles/backgrounds/* ~/Pictures/
 
 log "Remember to restart the system to apply all changes."
 log ""
