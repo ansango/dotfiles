@@ -51,13 +51,12 @@ fi
 read -p "Do you want to configure NVIDIA drivers? (y/N) " configure_nvidia
 if [[ $configure_nvidia =~ ^[Yy]$ ]]; then
     log "Configuring NVIDIA drivers..."
-    echo "install i915 /bin/false" | sudo tee --append /etc/modprobe.d/blacklist.conf
-    cat /etc/modprobe.d/blacklist.conf
+    #echo "install i915 /bin/false" | sudo tee --append /etc/modprobe.d/blacklist.conf
+    #cat /etc/modprobe.d/blacklist.conf
     sudo pacman -Syyuu --noconfirm
     sudo pacman -S xorg-server xorg-xinit xorg-apps --noconfirm
     sudo pacman -S nvidia nvidia-utils nvidia-settings --noconfirm
-    cat /usr/lib/modprobe.d/nvidia-utils.conf
-    blacklist nouveau
+    #cat /usr/lib/modprobe.d/nvidia-utils.conf
 fi
 
 # Install and configure ZSH
