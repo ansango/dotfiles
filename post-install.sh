@@ -158,7 +158,7 @@ fi
 
 # Copiar archivos de .dotfiles
 log "Copiando archivos de .dotfiles..."
-cp -r ~/dotfiles/dotfiles. ~/
+cp -a ~/dotfiles/dotfiles. ~/
 
 # Copiar fondos de pantalla
 log "Copiando fondos de pantalla..."
