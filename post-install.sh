@@ -89,7 +89,7 @@ fi
 read -p "¿Quieres instalar GNOME Tweaks y extensiones? (y/N) " install_gnome_tweaks
 if [[ $install_gnome_tweaks =~ ^[Yy]$ ]]; then
     log "Instalando GNOME Tweaks y extensiones..."
-    sudo pacman -S gnome-tweaks gnome-shell-extensions --noconfirm
+    sudo pacman -S gnome-tweaks gnome-shell-extensions gnome-browser-connector --noconfirm
 fi
 
 # Preguntar sobre la instalación de NVM
@@ -172,5 +172,7 @@ log "gh auth login"
 log ""
 log "Instala node.js con el siguiente comando:"
 log "nvm install --lts"
+log ""
+log "Instala https://extensions.gnome.org/extension/3733/tiling-assistant/"
 log ""
 log "¡Instalación y configuración completada!"
