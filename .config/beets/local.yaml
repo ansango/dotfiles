@@ -1,0 +1,4 @@
+# Edit this file to fit your system.
+directory: /mnt/6BEF-E3B3/music/beets/media # Destination directory for music files.
+library: /mnt/6BEF-E3B3/music/beets/beets_database.db # Database file.
+
