@@ -1,0 +1,13 @@
+services:
+  gonic_web:
+    image: sentriz/gonic:latest
+    container_name: gonic
+    ports:
+      - 4747:80
+    volumes:
+      - /mnt/6BEF-E3B3/music/beets/media:/music:ro
+      - $HOME/docker/gonic/data:/data
+      - $HOME/docker/gonic/cache:/cache
+      - $HOME/docker/gonic/podcasts:/podcasts
+      - $HOME/docker/gonic/playlists:/playlists # your playlists
+    restart: "unless-stopped"
