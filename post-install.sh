@@ -127,6 +127,13 @@ if [[ $install_firefox =~ ^[Yy]$ ]]; then
     sudo pacman -S firefox --noconfirm
 fi
 
+# Ask about installing Brave Browser
+read -p "Do you want to install Brave Browser? (y/N) " install_brave
+if [[ $install_brave =~ ^[Yy]$ ]]; then
+    log "Installing Brave Browser..."
+    yay -S brave-bin --noconfirm
+fi
+
 # Ask about installing Teams
 read -p "Do you want to install Teams? (y/N) " install_teams
 if [[ $install_teams =~ ^[Yy]$ ]]; then
