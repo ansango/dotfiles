@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       - CF_API_TOKEN=${CF_API_TOKEN}
-      - DOMAINS=sub1.midominio.com,sub2.midominio.com,sub3.midominio.com,sub4.midominio.com,sub5.midominio.com
+      - DOMAINS=dozzle.ansango.com,i.ansango.com,jellyfin.ansango.com,portainer.ansango.com,nginx.ansango.com,qt.ansango,vw.ansango.com,grafana.ansango.com
       - IP6_PROVIDER=none # si no usas IPv6
       - IP4_PROVIDER=cloudflare
       - PROXIED=true # activa el proxy naranja de Cloudflare
