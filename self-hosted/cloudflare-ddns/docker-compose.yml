@@ -1,0 +1,12 @@
+services:
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: always
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - DOMAINS=sub1.midominio.com,sub2.midominio.com,sub3.midominio.com,sub4.midominio.com,sub5.midominio.com
+      - IP6_PROVIDER=none # si no usas IPv6
+      - IP4_PROVIDER=cloudflare
+      - PROXIED=true # activa el proxy naranja de Cloudflare
+    network_mode: host
