@@ -1,0 +1,14 @@
+[window]
+
+dimensions.columns = 85
+dimensions.lines = 25
+decorations = "Buttonless"
+opacity = 0.75
+padding.x = 0
+padding.y = 0
+
+startup_mode = "Windowed"
+
+[font]
+
+size = 16

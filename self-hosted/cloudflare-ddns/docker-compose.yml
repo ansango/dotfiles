@@ -1,0 +1,12 @@
+services:
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: always
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - DOMAINS=dozzle.ansango.com,i.ansango.com,jellyfin.ansango.com,portainer.ansango.com,nginx.ansango.com,qt.ansango.com,vw.ansango.com,grafana.ansango.com
+      #- IP6_PROVIDER=none # si no usas IPv6
+      #- IP4_PROVIDER=cloudflare.trace
+      - PROXIED=false # activa el proxy naranja de Cloudflare
+    network_mode: host

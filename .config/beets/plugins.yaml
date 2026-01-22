@@ -1,0 +1,14 @@
+plugins: [
+    bandcamp, # Beetcamp. Use bandcamp as an autotagger source for eg. artwork and lyrics.
+    convert, #The convert plugin transcodes your music files to a different format.
+    embedart, #The embedart plugin embeds album art images into your music files’ metadata tags.
+    export, #The export plugin writes your music library to a variety of formats.
+    fetchart, #The fetchart plugin retrieves album art images from various sources on the Web and stores them as image files.
+    #discogs, #The discogs plugin extends the autotagger’s search capabilities to include matches from the Discogs database.
+    #lastimport, #The lastimport plugin downloads play-count data from your Last.fm library into beets’ database. You can later create smart playlists by querying play_count and do other fun stuff with this field.
+    #lastgenre, #The lastgenre plugin fetches tags from Last.fm and assigns them as genres to your albums and items.
+    #lyrics, #The lyrics plugin fetches lyrics for your music and stores them in your library.
+    mbcollection, # Lets you submit your catalog to MusicBrainz to maintain your music collection list there.
+    #mbsubmit, # Provides an extra prompt choice during an import session that prints the tracks
+    mbsync, # This plugin provides the mbsync command,
+  ]
