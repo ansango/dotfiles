@@ -124,8 +124,26 @@ export NVM_DIR="$HOME/.nvm"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-# beets
-alias beet='~/bin/beets/venv/bin/beet'
-alias bcdl='yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata --write-thumbnail --convert-thumbnails jpg --replace-in-metadata "title" "^.* - " "" --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop='ih':'ih'\"" -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
-alias ytdl='yt-dlp --cookies-from-browser firefox -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata --write-thumbnail --convert-thumbnails jpg --replace-in-metadata "title" "^.* - " "" --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop='ih':'ih'\"" --parse-metadata "%(playlist_index)s:%(track_number)s" --parse-metadata "%(release_year,upload_date>%Y)s:%(meta_date)s" -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
+# yt-dlp
+alias bcdl='yt-dlp \
+  --js-runtime bun \
+  -x --audio-format mp3 --audio-quality 0 \
+  --embed-thumbnail --add-metadata --write-thumbnail \
+  --convert-thumbnails jpg \
+  --replace-in-metadata "title" "^.* - " "" \
+  --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop=ih:ih\"" \
+  -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" \
+  -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
 
+alias ytdl='yt-dlp \
+  --js-runtime bun \
+  --cookies-from-browser firefox \
+  -x --audio-format mp3 --audio-quality 0 \
+  --embed-thumbnail --add-metadata --write-thumbnail \
+  --convert-thumbnails jpg \
+  --replace-in-metadata "title" "^.* - " "" \
+  --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop=ih:ih\"" \
+  --parse-metadata "%(playlist_index)s:%(track_number)s" \
+  --parse-metadata "%(release_year,upload_date>%Y)s:%(meta_date)s" \
+  -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" \
+  -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
