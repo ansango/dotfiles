@@ -58,7 +58,7 @@ if [ "$COL_CHECK" != "200" ]; then
         }' > /dev/null
 
     # Campos de texto
-    for field in "name" "album_name"; do
+    for field in "name" "folder_name"; do
         curl -s -X POST "$URL/fields/photos" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
@@ -145,7 +145,7 @@ for dir in */; do
                     -d "{
                         \"image\": \"$FILE_ID\",
                         \"name\": \"$filename_no_ext\",
-                        \"album_name\": \"$folder_name\",
+                        \"folder_name\": \"$folder_name\",
                         \"date_taken\": \"$(date -r "$file" +"%Y-%m-%dT%H:%M:%SZ")\"
                     }" > /dev/null
 
