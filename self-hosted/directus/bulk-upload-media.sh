@@ -8,7 +8,7 @@
 
 # --- CONFIGURACIÓN ---
 URL="https://cms.ansango.com"
-TOKEN="Qi8Ufv6H2-V1NnQGXnbMq4CP6phHVlZL"
+TOKEN=""
 PATH_LOCAL="/media/ansango/Store/images/Negativos/Originales"
 NOMBRE_PADRE="films"
 
