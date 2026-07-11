@@ -1,4 +1,5 @@
 #!/bin/bash
+# Setup script for Debian 13 (Trixie) - actualizado para 13.6
 
 if [ -z "$BASH_VERSION" ]; then
     exec bash "$0" "$@"
@@ -14,6 +15,13 @@ error() {
     echo "[ERROR] $1"
 }
 
+# Ask for the sudo password once, then keep the credential cache alive in the
+# background for the rest of the script so it doesn't get asked again mid-run.
+sudo -v
+( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
+
 # Check if dialog is installed and install it if necessary
 if ! command -v dialog >/dev/null 2>&1; then
     log "dialog not found. Installing dialog..."
@@ -23,18 +31,16 @@ fi
 CURRENT_USER=$(whoami)
 log "Current user: $CURRENT_USER"
 
-apt install sudo
-
 logging() {
     echo "[LOG] Current user inside function: $CURRENT_USER"
-    su -c 'echo "[LOG] Current user inside su -c: $(whoami)"' $CURRENT_USER
+    su -c 'echo "[LOG] Current user inside su -c: $(whoami)"' "$CURRENT_USER"
 }
 
 # Function to create a sudo user
 create_sudo_user() {
     log "Creating sudo user (placeholder)"
 
-    # check if log is root
+    # check if running as root
     if [ "$EUID" -ne 0 ]; then
         error "Please run as root to create a sudo user."
         return 1
@@ -42,16 +48,15 @@ create_sudo_user() {
 
     username=$(dialog --inputbox "Enter the new username:" 8 40 2>&1 >/dev/tty)
     clear
-    echo $username
+    echo "$username"
     if [ -z "$username" ]; then
         error "Username cannot be empty."
         return 1
     fi
 
     apt install -y sudo
-
-    adduser $username sudo
-    CURRENT_USER=$username
+    adduser "$username" sudo
+    CURRENT_USER="$username"
     log "User $username created and added to sudo group."
 }
 
@@ -59,6 +64,44 @@ update_and_upgrade(){
     log "Updating and upgrading with apt"
     sudo apt update -y
     sudo apt upgrade -y
+}
+
+# Function to update everything: apt packages + flatpak apps/runtimes
+update_all() {
+    logging
+    update_and_upgrade
+
+    if command -v flatpak >/dev/null 2>&1; then
+        log "Updating flatpak apps and runtimes"
+        flatpak update -y
+        flatpak uninstall --unused -y
+    else
+        log "flatpak not installed, skipping flatpak update"
+    fi
+
+    log "Update all completed"
+}
+
+# Helper: ensure flatpak + flathub remote are set up (used by several apps)
+ensure_flatpak() {
+    if ! command -v flatpak >/dev/null 2>&1; then
+        log "flatpak not found. Installing flatpak..."
+        sudo apt install -y flatpak gnome-software-plugin-flatpak
+        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        log "flatpak installed"
+    fi
+}
+
+# Helper: ensure Microsoft VSCode apt repo is configured (used by vscode + vscode insiders)
+ensure_vscode_repo() {
+    if [ ! -f /etc/apt/sources.list.d/vscode.list ]; then
+        log "Adding Microsoft VSCode repository"
+        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/keyrings/microsoft-archive-keyring.gpg
+        sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+        rm -f microsoft.gpg
+        sudo apt update -y
+    fi
 }
 
 # Function to install Gnome Desktop - Core
@@ -75,7 +118,7 @@ plugins=ifupdown,keyfile
 [ifupdown]
 managed=true
 EOF
-    
+
     log "NetworkManager configuration updated."
 }
 
@@ -83,7 +126,6 @@ EOF
 install_gnome_tweaks() {
     logging
     log "Installing Gnome Tweaks"
-    update_and_upgrade
     sudo apt install gnome-tweaks -y
 }
 
@@ -118,7 +160,6 @@ EOF
 install_nvidia_drivers() {
     logging
     log "Installing Nvidia drivers"
-    update_and_upgrade
     sudo apt install nvidia-detect -y
     sudo apt install linux-headers-amd64 -y
     sudo apt install nvidia-driver -y
@@ -128,7 +169,6 @@ install_nvidia_drivers() {
 install_curl() {
     logging
     log "Installing curl"
-    update_and_upgrade
     sudo apt install curl -y
 }
 
@@ -136,7 +176,6 @@ install_curl() {
 install_wget() {
     logging
     log "Installing wget"
-    update_and_upgrade
     sudo apt install wget -y
 }
 
@@ -144,7 +183,6 @@ install_wget() {
 install_git() {
     logging
     log "Installing git"
-    update_and_upgrade
     sudo apt install git -y
 }
 
@@ -152,7 +190,6 @@ install_git() {
 install_gh_cli() {
     logging
     log "Installing gh cli"
-    update_and_upgrade
     sudo apt install gh -y
 }
 
@@ -160,7 +197,6 @@ install_gh_cli() {
 install_nerd_fonts() {
     logging
     log "Installing nerd fonts"
-    update_and_upgrade
     sudo apt install fonts-noto fonts-firacode fonts-powerline -y
     sudo wget -P /usr/local/share/fonts https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
     sudo wget -P /usr/local/share/fonts https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
@@ -172,56 +208,133 @@ install_nerd_fonts() {
 install_zsh() {
     logging
     log "Installing Oh My Zsh"
-    update_and_upgrade
     sudo apt install zsh -y
     # add passwordless sudo for current user
-    sudo usermod -aG sudo $CURRENT_USER
+    sudo usermod -aG sudo "$CURRENT_USER"
     # change default shell to zsh for current user
-    sudo chsh -s $(which zsh) $CURRENT_USER
+    sudo chsh -s "$(which zsh)" "$CURRENT_USER"
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" "" --unattended
-    git clone https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-    sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' $HOME/.zshrc
+    git clone https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' "$HOME/.zshrc"
     log "Oh My Zsh installed"
-
 }
 
 # Function to install NVM
 install_nvm() {
     logging
     log "Installing nvm"
-    update_and_upgrade
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    log "NVM installed"
-    exec zsh
-    nvm --version
+    if command -v nvm >/dev/null 2>&1; then
+        log "NVM installed. Version: $(nvm --version)"
+    else
+        log "NVM installed. Abre una nueva shell (o haz 'source ~/.bashrc'/'source ~/.zshrc') para usarlo."
+    fi
 }
 
-# Function to install Node.js (LTS)
+# Function to install Node.js (LTS) - depende de NVM
 install_nodejs() {
     logging
     log "Installing nodejs (LTS)"
-    update_and_upgrade
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    if ! command -v nvm >/dev/null 2>&1; then
+        error "nvm not found. Selecciona primero 'Install NVM'."
+        return 1
+    fi
     nvm install --lts
 }
 
-# Function to install VSCode
+# Function to install Bun
+install_bun() {
+    logging
+    log "Installing bun"
+    curl -fsSL https://bun.sh/install | bash
+    log "Bun instalado. Abre una nueva shell para usarlo."
+}
+
+# Function to install VSCode (stable)
 install_vscode() {
     logging
     log "Installing vscode"
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-    sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/keyrings/microsoft-archive-keyring.gpg
-    sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-    update_and_upgrade
-    sudo apt install code-insiders -y
+    ensure_vscode_repo
+    sudo apt install -y code
+}
+
+# Function to install VSCode Insiders
+install_vscode_insiders() {
+    logging
+    log "Installing vscode insiders"
+    ensure_vscode_repo
+    sudo apt install -y code-insiders
+}
+
+# Function to install Zed
+install_zed() {
+    logging
+    log "Installing Zed"
+    curl -f https://zed.dev/install.sh | sh
+}
+
+# Function to install Docker Engine + Compose plugin
+install_docker() {
+    logging
+    log "Installing Docker"
+    sudo apt install -y ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    sudo apt update -y
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo usermod -aG docker "$CURRENT_USER"
+    log "Docker instalado. Cierra sesión y vuelve a entrar para usar docker sin sudo."
+}
+
+# Function to install Pi Coding Agent (pi.dev)
+install_pi_agent() {
+    logging
+    log "Installing Pi Coding Agent"
+    curl -fsSL https://pi.dev/install.sh | sh
+}
+
+# Function to install Claude Code
+install_claude_code() {
+    logging
+    log "Installing Claude Code"
+    curl -fsSL https://claude.ai/install.sh | bash
+}
+
+# Function to install GitHub Copilot CLI
+install_copilot_cli() {
+    logging
+    log "Installing GitHub Copilot CLI"
+    curl -fsSL https://gh.io/copilot-install | bash
+}
+
+# Function to install OpenCode
+install_opencode() {
+    logging
+    log "Installing OpenCode"
+    curl -fsSL https://opencode.ai/install | bash
+}
+
+# Function to install Ollama
+install_ollama() {
+    logging
+    log "Installing Ollama"
+    curl -fsSL https://ollama.com/install.sh | sh
 }
 
 # Function to install Firefox
 install_firefox() {
     logging
     log "Installing firefox"
-    update_and_upgrade
     sudo apt install firefox -y
 }
 
@@ -231,140 +344,245 @@ install_brave() {
     log "Installing brave"
     sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
     sudo curl -fsSLo /etc/apt/sources.list.d/brave-browser-release.sources https://brave-browser-apt-release.s3.brave.com/brave-browser.sources
-    update_and_upgrade
+    sudo apt update -y
     sudo apt install brave-browser -y
+}
+
+# Function to install Thunderbird
+install_thunderbird() {
+    logging
+    log "Installing thunderbird"
+    sudo apt install -y thunderbird
+}
+
+# Function to install Zen Browser
+install_zen_browser() {
+    logging
+    log "Installing Zen Browser"
+    ensure_flatpak
+    flatpak install -y flathub app.zen_browser.zen
+}
+
+# Function to install Obsidian
+install_obsidian() {
+    logging
+    log "Installing obsidian"
+    ensure_flatpak
+    flatpak install -y flathub md.obsidian.Obsidian
+}
+
+# Function to install OrcaSlicer
+install_orcaslicer() {
+    logging
+    log "Installing OrcaSlicer"
+    ensure_flatpak
+    flatpak install -y flathub com.orcaslicer.OrcaSlicer
+}
+
+# Function to install Bambu Studio
+install_bambu_studio() {
+    logging
+    log "Installing Bambu Studio"
+    ensure_flatpak
+    flatpak install -y flathub com.bambulab.BambuStudio
+}
+
+# Function to install Darktable
+install_darktable() {
+    logging
+    log "Installing darktable"
+    sudo apt install -y darktable
+}
+
+# Function to install Strawberry Music Player
+install_strawberry() {
+    logging
+    log "Installing Strawberry Music Player"
+    sudo apt install -y strawberry
 }
 
 # Function to install VLC Media Player
 install_vlc() {
     logging
     log "Installing vlc"
-    update_and_upgrade
     sudo apt install vlc -y
-}
-
-# Function to install Obsidian
-install_obsidian() {
-    log "Installing obsidian"
-    update_and_upgrade
-    # install flatpak if not installed
-    if ! command -v flatpak >/dev/null 2>&1; then
-        log "flatpak not found. Installing flatpak..."
-        sudo apt install flatpak -y
-        sudo apt install gnome-software-plugin-flatpak -y
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        log "flatpak installed"
-        exec zsh
-        flatpak install flathub md.obsidian.Obsidian -y
-    fi
-    flatpak install flathub md.obsidian.Obsidian -y
 }
 
 # --- MAIN LOGIC ---
 
 HEIGHT=20
-WIDTH=70
-CHOICE_HEIGHT=10
-BACKTITLE="Setup Script"
-TITLE="Setup Options"
-MENU="Choose what to setup:"
+WIDTH=76
+CHOICE_HEIGHT=12
+BACKTITLE="Setup Script - Debian Trixie 13.6"
 
-OPTIONS=(
+SELECTED_ACTIONS=()
+
+# dialog no soporta secciones dentro de un mismo --checklist, así que se
+# encadenan varios checklists (uno por categoría) y se van acumulando
+# las acciones elegidas en SELECTED_ACTIONS.
+run_section() {
+    local title="$1"
+    local menu="$2"
+    shift 2
+    dialog --clear \
+        --backtitle "$BACKTITLE" \
+        --title "$title" \
+        --checklist "$menu" \
+        "$HEIGHT" "$WIDTH" "$CHOICE_HEIGHT" \
+        "$@" \
+        2>&1 >/dev/tty
+}
+
+# --- Sección: Sistema ---
+SISTEMA_OPTIONS=(
     1 "Create a sudo user" OFF
     2 "Install Gnome Desktop - Core" OFF
     3 "Install Gnome Tweaks" OFF
     4 "Update Repositories Sources List" OFF
     5 "Install Nvidia Drivers" OFF
-    6 "Install Curl" OFF
-    7 "Install Wget" OFF
-    8 "Install Git" OFF
-    9 "Install GH CLI" OFF
-    10 "Install Nerd Fonts" OFF
-    11 "Install Zsh and Oh My Zsh" OFF
-    12 "Install NVM" OFF
-    13 "Install Node.js (LTS)" OFF
-    14 "Install VSCode" OFF
-    15 "Install Firefox" OFF
-    16 "Install Brave Browser" OFF
-    17 "Install VLC Media Player" OFF
-    18 "Install Obsidian" OFF
+    6 "Update everything (apt + flatpak)" OFF
 )
-
-CHOICES=$(dialog --clear \
-                --backtitle "$BACKTITLE" \
-                --title "$TITLE" \
-                --checklist "$MENU" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-                "${OPTIONS[@]}" \
-                2>&1 >/dev/tty)
-
+CHOICES=$(run_section "Sistema" "Elige opciones de sistema:" "${SISTEMA_OPTIONS[@]}")
 clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(create_sudo_user) ;;
+        2) SELECTED_ACTIONS+=(install_gnome_core) ;;
+        3) SELECTED_ACTIONS+=(install_gnome_tweaks) ;;
+        4) SELECTED_ACTIONS+=(update_repos) ;;
+        5) SELECTED_ACTIONS+=(install_nvidia_drivers) ;;
+        6) SELECTED_ACTIONS+=(update_all) ;;
+    esac
+done
 
-if [ $? -ne 0 ]; then
+# --- Sección: Herramientas base ---
+BASE_OPTIONS=(
+    1 "Install Curl" OFF
+    2 "Install Wget" OFF
+    3 "Install Git" OFF
+    4 "Install GH CLI" OFF
+    5 "Install Nerd Fonts" OFF
+    6 "Install Zsh and Oh My Zsh" OFF
+)
+CHOICES=$(run_section "Herramientas base" "Elige herramientas base:" "${BASE_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_curl) ;;
+        2) SELECTED_ACTIONS+=(install_wget) ;;
+        3) SELECTED_ACTIONS+=(install_git) ;;
+        4) SELECTED_ACTIONS+=(install_gh_cli) ;;
+        5) SELECTED_ACTIONS+=(install_nerd_fonts) ;;
+        6) SELECTED_ACTIONS+=(install_zsh) ;;
+    esac
+done
+
+# --- Sección: Desarrollo ---
+DEV_OPTIONS=(
+    1 "Install NVM" OFF
+    2 "Install Node.js (LTS) [requiere NVM]" OFF
+    3 "Install Bun" OFF
+    4 "Install VSCode" OFF
+    5 "Install VSCode Insiders" OFF
+    6 "Install Zed" OFF
+    7 "Install Docker" OFF
+)
+CHOICES=$(run_section "Desarrollo" "Elige herramientas de desarrollo:" "${DEV_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_nvm) ;;
+        2) SELECTED_ACTIONS+=(install_nodejs) ;;
+        3) SELECTED_ACTIONS+=(install_bun) ;;
+        4) SELECTED_ACTIONS+=(install_vscode) ;;
+        5) SELECTED_ACTIONS+=(install_vscode_insiders) ;;
+        6) SELECTED_ACTIONS+=(install_zed) ;;
+        7) SELECTED_ACTIONS+=(install_docker) ;;
+    esac
+done
+
+# --- Sección: Agentes IA / CLI ---
+AI_OPTIONS=(
+    1 "Install Pi Coding Agent" OFF
+    2 "Install Claude Code" OFF
+    3 "Install GitHub Copilot CLI" OFF
+    4 "Install OpenCode" OFF
+    5 "Install Ollama" OFF
+)
+CHOICES=$(run_section "Agentes IA / CLI" "Elige agentes/CLIs de IA:" "${AI_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_pi_agent) ;;
+        2) SELECTED_ACTIONS+=(install_claude_code) ;;
+        3) SELECTED_ACTIONS+=(install_copilot_cli) ;;
+        4) SELECTED_ACTIONS+=(install_opencode) ;;
+        5) SELECTED_ACTIONS+=(install_ollama) ;;
+    esac
+done
+
+# --- Sección: Navegadores y comunicación ---
+NET_OPTIONS=(
+    1 "Install Brave Browser" OFF
+    2 "Install Firefox" OFF
+    3 "Install Thunderbird" OFF
+    4 "Install Zen Browser" OFF
+)
+CHOICES=$(run_section "Navegadores y comunicación" "Elige navegadores/comunicación:" "${NET_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_brave) ;;
+        2) SELECTED_ACTIONS+=(install_firefox) ;;
+        3) SELECTED_ACTIONS+=(install_thunderbird) ;;
+        4) SELECTED_ACTIONS+=(install_zen_browser) ;;
+    esac
+done
+
+# --- Sección: Notas ---
+NOTES_OPTIONS=(
+    1 "Install Obsidian" OFF
+)
+CHOICES=$(run_section "Notas" "Elige apps de notas:" "${NOTES_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_obsidian) ;;
+    esac
+done
+
+# --- Sección: Multimedia e impresión 3D ---
+MEDIA_OPTIONS=(
+    1 "Install OrcaSlicer" OFF
+    2 "Install Bambu Studio" OFF
+    3 "Install Darktable" OFF
+    4 "Install Strawberry Music Player" OFF
+    5 "Install VLC Media Player" OFF
+)
+CHOICES=$(run_section "Multimedia e impresión 3D" "Elige apps de multimedia/impresión 3D:" "${MEDIA_OPTIONS[@]}")
+clear
+for CHOICE in $CHOICES; do
+    case $CHOICE in
+        1) SELECTED_ACTIONS+=(install_orcaslicer) ;;
+        2) SELECTED_ACTIONS+=(install_bambu_studio) ;;
+        3) SELECTED_ACTIONS+=(install_darktable) ;;
+        4) SELECTED_ACTIONS+=(install_strawberry) ;;
+        5) SELECTED_ACTIONS+=(install_vlc) ;;
+    esac
+done
+
+if [ ${#SELECTED_ACTIONS[@]} -eq 0 ]; then
     log "No options selected. Exiting."
     exit 1
 fi
 
-for CHOICE in $CHOICES;
-do
-    case $CHOICE in
-        1)
-            create_sudo_user
-            ;;
-        2)
-            install_gnome_core
-            ;;
-        3)
-            install_gnome_tweaks
-            ;;
-        4)
-            update_repos
-            ;;
-        5)
-            install_nvidia_drivers
-            ;;
-        6)
-            install_curl
-            ;;
-        7)
-            install_wget
-            ;;
-        8)
-            install_git
-            ;;
-        9)
-            install_gh_cli
-            ;;
-        10)
-            install_nerd_fonts
-            ;;
-        11)
-            install_zsh
-            ;;
-        12)
-            install_nvm
-            ;;
-        13)
-            install_nodejs
-            ;;
-        14)
-            install_vscode
-            ;;
-        15)
-            install_firefox
-            ;;
-        16)
-            install_brave
-            ;;
-        17)
-            install_vlc
-            ;;
-        18)
-            install_obsidian
-            ;;
-    esac
+# Un único update/upgrade para todas las acciones seleccionadas
+update_and_upgrade
+
+for ACTION in "${SELECTED_ACTIONS[@]}"; do
+    "$ACTION"
 done
 
 log ""
 log "Setup completed!"
-log $CHOICES
+log "Executed: ${SELECTED_ACTIONS[*]}"
