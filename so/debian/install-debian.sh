@@ -413,6 +413,11 @@ install_yt_dlp() {
     logging
     log "Installing yt-dlp"
     sudo apt install -y yt-dlp
+    # ffmpeg/ffprobe: dependencia "strongly recommended" de yt-dlp, necesaria
+    # para fusionar audio/vídeo y para el post-procesado (extraer audio,
+    # convertir formato, incrustar carátulas, etc.)
+    # https://github.com/yt-dlp/yt-dlp#strongly-recommended
+    sudo apt install -y ffmpeg
 }
 
 # --- MAIN LOGIC ---
