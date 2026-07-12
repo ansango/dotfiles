@@ -408,6 +408,13 @@ install_vlc() {
     sudo apt install vlc -y
 }
 
+# Function to install yt-dlp
+install_yt_dlp() {
+    logging
+    log "Installing yt-dlp"
+    sudo apt install -y yt-dlp
+}
+
 # --- MAIN LOGIC ---
 
 HEIGHT=20
@@ -558,6 +565,7 @@ MEDIA_OPTIONS=(
     3 "Install Darktable" OFF
     4 "Install Strawberry Music Player" OFF
     5 "Install VLC Media Player" OFF
+    6 "Install yt-dlp" OFF
 )
 CHOICES=$(run_section "Multimedia e impresión 3D" "Elige apps de multimedia/impresión 3D:" "${MEDIA_OPTIONS[@]}")
 clear
@@ -568,6 +576,7 @@ for CHOICE in $CHOICES; do
         3) SELECTED_ACTIONS+=(install_darktable) ;;
         4) SELECTED_ACTIONS+=(install_strawberry) ;;
         5) SELECTED_ACTIONS+=(install_vlc) ;;
+        6) SELECTED_ACTIONS+=(install_yt_dlp) ;;
     esac
 done
 
