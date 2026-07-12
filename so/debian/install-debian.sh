@@ -418,6 +418,22 @@ install_yt_dlp() {
     # convertir formato, incrustar carátulas, etc.)
     # https://github.com/yt-dlp/yt-dlp#strongly-recommended
     sudo apt install -y ffmpeg
+
+    log "Adding yt-dlp album download aliases to .zshrc"
+    ZSHRC="$HOME/.zshrc"
+    touch "$ZSHRC"
+    if ! grep -q "# >>> yt-dlp aliases >>>" "$ZSHRC" 2>/dev/null; then
+        cat >> "$ZSHRC" << 'EOF'
+
+# >>> yt-dlp aliases >>>
+alias bcdl='yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata --write-thumbnail --convert-thumbnails jpg --replace-in-metadata "title" "^.* - " "" --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop='ih':'ih'\"" -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
+alias ytdl='yt-dlp --cookies-from-browser firefox -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata --write-thumbnail --convert-thumbnails jpg --replace-in-metadata "title" "^.* - " "" --ppa "ThumbnailsConvertor:-c:v mjpeg -vf \"crop='ih':'ih'\"" --parse-metadata "%(playlist_index)s:%(track_number)s" --parse-metadata "%(release_year,upload_date>%Y)s:%(meta_date)s" -o "thumbnail:%(uploader)s/%(album)s/cover.%(ext)s" -o "%(uploader)s/%(album)s/%(playlist_index)02d %(title)s.%(ext)s"'
+# <<< yt-dlp aliases <<<
+EOF
+        log "Aliases added. Ejecuta 'source ~/.zshrc' (o abre una nueva shell) para usarlos: bcdl, ytdl"
+    else
+        log "yt-dlp aliases already present in .zshrc, skipping"
+    fi
 }
 
 # --- MAIN LOGIC ---
