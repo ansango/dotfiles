@@ -219,6 +219,13 @@ install_zsh() {
     log "Oh My Zsh installed"
 }
 
+# Function to install Fastfetch
+install_fastfetch() {
+    logging
+    log "Installing fastfetch"
+    sudo apt install -y fastfetch
+}
+
 # Function to install NVM
 install_nvm() {
     logging
@@ -491,6 +498,7 @@ BASE_OPTIONS=(
     4 "Install GH CLI" OFF
     5 "Install Nerd Fonts" OFF
     6 "Install Zsh and Oh My Zsh" OFF
+    7 "Install Fastfetch" OFF
 )
 CHOICES=$(run_section "Herramientas base" "Elige herramientas base:" "${BASE_OPTIONS[@]}")
 clear
@@ -502,6 +510,7 @@ for CHOICE in $CHOICES; do
         4) SELECTED_ACTIONS+=(install_gh_cli) ;;
         5) SELECTED_ACTIONS+=(install_nerd_fonts) ;;
         6) SELECTED_ACTIONS+=(install_zsh) ;;
+        7) SELECTED_ACTIONS+=(install_fastfetch) ;;
     esac
 done
 
